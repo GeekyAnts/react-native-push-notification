@@ -41,6 +41,9 @@ NotificationsComponent.prototype.cancelLocalNotifications = function(details: Ob
 NotificationsComponent.prototype.clearLocalNotification = function(details: Object) {
 	RNPushNotification.clearLocalNotification(details);
 };
+NotificationsComponent.prototype.setSharedKey = function (sharedKey: string) {
+	RNPushNotification.setSharedKey(sharedKey);
+};
 
 NotificationsComponent.prototype.cancelAllLocalNotifications = function() {
 	RNPushNotification.cancelAllLocalNotifications();

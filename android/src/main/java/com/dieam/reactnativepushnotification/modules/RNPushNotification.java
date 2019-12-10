@@ -33,13 +33,15 @@ import com.google.firebase.messaging.FirebaseMessaging;
 public class RNPushNotification extends ReactContextBaseJavaModule implements ActivityEventListener {
     public static final String LOG_TAG = "RNPushNotification";// all logging should use this tag
     public static String PUBNUB_SHARED_KEY = "";
+    public static String MIXPANEL_KEY = "";
+    public static ReactApplicationContext myContext;
     private RNPushNotificationHelper mRNPushNotificationHelper;
     private final Random mRandomNumberGenerator = new Random(System.currentTimeMillis());
     private RNPushNotificationJsDelivery mJsDelivery;
 
     public RNPushNotification(ReactApplicationContext reactContext) {
         super(reactContext);
-
+        myContext = reactContext;
         reactContext.addActivityEventListener(this);
 
         Application applicationContext = (Application) reactContext.getApplicationContext();
@@ -151,6 +153,10 @@ public class RNPushNotification extends ReactContextBaseJavaModule implements Ac
         PUBNUB_SHARED_KEY = sharedKey;
     }
 
+    @ReactMethod
+    public void setMixpanelKey(String mixPanelKey){
+        MIXPANEL_KEY = mixPanelKey;
+    }
     @ReactMethod
     public void presentLocalNotification(ReadableMap details) {
         Bundle bundle = Arguments.toBundle(details);

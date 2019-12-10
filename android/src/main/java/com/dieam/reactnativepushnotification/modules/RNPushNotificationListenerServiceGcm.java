@@ -14,18 +14,24 @@ import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.google.android.gms.gcm.GcmListenerService; 
+import com.mixpanel.android.mpmetrics.MixpanelAPI;
 import com.pubnub.api.*;
 
 import org.json.JSONObject;
 
 import java.util.List;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Random;
+import java.util.Map;
 
 import static com.dieam.reactnativepushnotification.modules.RNPushNotification.LOG_TAG;
 import static com.dieam.reactnativepushnotification.modules.RNPushNotification.PUBNUB_SHARED_KEY;
-
+import static com.dieam.reactnativepushnotification.modules.RNPushNotification.MIXPANEL_KEY;
+import static com.dieam.reactnativepushnotification.modules.RNPushNotification.myContext;
 
 public class RNPushNotificationListenerServiceGcm extends GcmListenerService {
+    private Map<String, MixpanelAPI> instances;
 
     @Override
     public void onMessageReceived(String from, final Bundle bundle) { 
@@ -35,10 +41,24 @@ public class RNPushNotificationListenerServiceGcm extends GcmListenerService {
         pnConfiguration.setSubscribeKey("demo");
         pnConfiguration.setPublishKey("demo");
         PubNub pubnub = new PubNub(pnConfiguration);
+
+        MixpanelAPI instance = MixpanelAPI.getInstance(myContext,MIXPANEL_KEY);
+        Map<String, MixpanelAPI> newInstances = new HashMap<>();
+        if (instances != null) {
+
+            newInstances.putAll(instances);
+        }
+        newInstances.put(MIXPANEL_KEY, instance);
+        instances = Collections.unmodifiableMap(newInstances);
+        synchronized(instance) {
+
+            instance.track("Notification Recieved on android native side.");
+        }
+
         if (bundle.containsKey("twi_body")) {
             bundle.putString("message", bundle.getString("twi_body"));
         }
-
+        
         if (data != null) {
             if (!bundle.containsKey("message")) {
                 bundle.putString("message", data.optString("alert", null));
@@ -127,8 +147,6 @@ public class RNPushNotificationListenerServiceGcm extends GcmListenerService {
         if (bundle.getString("contentAvailable", "false").equalsIgnoreCase("true")) {
             jsDelivery.notifyRemoteFetch(bundle);
         }
-
-        Log.v(LOG_TAG, "sendNotification: " + bundle);
 
         if (!isForeground) {
             Application applicationContext = (Application) context.getApplicationContext();

@@ -48,6 +48,5 @@ dependencies {
     implementation "com.google.android.gms:play-services-gcm:${safeExtGet('googlePlayServicesVersion', '+')}"
     implementation 'me.leolin:ShortcutBadger:1.1.8@aar'
     implementation "com.google.firebase:firebase-messaging:${safeExtGet('firebaseVersion', '+')}"
-    compile group: "com.pubnub", name: "pubnub-gson", version: "4.29.1"
     compile "com.mixpanel.android:mixpanel-android:5.3.0"
 }

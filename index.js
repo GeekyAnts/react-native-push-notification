@@ -340,9 +340,6 @@ Notifications.abandonPermissions = function() {
   return this.callNative("abandonPermissions", arguments);
 };
 
-Notifications.setSharedKey = function() {
-  return this.callNative("setSharedKey", arguments);
-};
 Notifications.setMixpanelKey = function() {
   return this.callNative("setMixpanelKey", arguments);
 };

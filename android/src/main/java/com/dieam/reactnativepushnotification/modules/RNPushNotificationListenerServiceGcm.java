@@ -15,7 +15,6 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.google.android.gms.gcm.GcmListenerService; 
 import com.mixpanel.android.mpmetrics.MixpanelAPI;
-import com.pubnub.api.*;
 
 import org.json.JSONObject;
 
@@ -26,7 +25,6 @@ import java.util.Random;
 import java.util.Map;
 
 import static com.dieam.reactnativepushnotification.modules.RNPushNotification.LOG_TAG;
-import static com.dieam.reactnativepushnotification.modules.RNPushNotification.PUBNUB_SHARED_KEY;
 import static com.dieam.reactnativepushnotification.modules.RNPushNotification.MIXPANEL_KEY;
 import static com.dieam.reactnativepushnotification.modules.RNPushNotification.myContext;
 
@@ -37,11 +35,6 @@ public class RNPushNotificationListenerServiceGcm extends GcmListenerService {
     public void onMessageReceived(String from, final Bundle bundle) { 
         JSONObject data = getPushData(bundle.getString("data"));
         // Copy `twi_body` to `message` to support Twilio
-        PNConfiguration pnConfiguration = new PNConfiguration();
-        pnConfiguration.setSubscribeKey("demo");
-        pnConfiguration.setPublishKey("demo");
-        PubNub pubnub = new PubNub(pnConfiguration);
-
         MixpanelAPI instance = MixpanelAPI.getInstance(myContext,MIXPANEL_KEY);
         Map<String, MixpanelAPI> newInstances = new HashMap<>();
         if (instances != null) {
@@ -78,20 +71,6 @@ public class RNPushNotificationListenerServiceGcm extends GcmListenerService {
                 ApplicationBadgeHelper.INSTANCE.setApplicationIconBadgeNumber(this, badge);
             }
         }
-        try {
-            String decrypedMessage = pubnub.decrypt(bundle.getString("message"),PUBNUB_SHARED_KEY);
-            bundle.putString("message", decrypedMessage);
-        }catch(Exception e){
-            Log.v(LOG_TAG, "EXCEPTION::::" + e);
-        }
-        try {
-            String decrypedMessage = pubnub.decrypt(bundle.getString("title"),PUBNUB_SHARED_KEY);
-            bundle.putString("title", decrypedMessage);
-        }catch(Exception e){
-            Log.v(LOG_TAG, "EXCEPTION::::" + e);
-        }
-        Log.v(LOG_TAG, "onMessageReceived: " + bundle);
-
         // We need to run this on the main thread, as the React code assumes that is true.
         // Namely, DevServerHelper constructs a Handler() without a Looper, which triggers:
         // "Can't create handler inside thread that has not called Looper.prepare()"

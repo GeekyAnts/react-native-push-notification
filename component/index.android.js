@@ -43,9 +43,6 @@ NotificationsComponent.prototype.clearLocalNotification = function(
 ) {
   RNPushNotification.clearLocalNotification(details);
 };
-NotificationsComponent.prototype.setSharedKey = function(sharedKey: string) {
-  RNPushNotification.setSharedKey(sharedKey);
-};
 
 NotificationsComponent.prototype.setMixpanelKey = function(
   mixPanelKey: string

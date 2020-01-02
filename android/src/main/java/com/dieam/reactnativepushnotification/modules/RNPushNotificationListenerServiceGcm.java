@@ -79,8 +79,8 @@ public class RNPushNotificationListenerServiceGcm extends GcmListenerService {
             }
         }
         
-        Log.v(LOG_TAG, "IS ENCRYPTED ::::" + bundle.getString("encrypted"));
-        if(bundle.getBoolean("encrypted",false) == true){
+        Boolean isEncrypted =  Boolean.parseBoolean(bundle.getString("encrypted", "false")); 
+        if(isEncrypted == true){
             try {
                 String decrypedMessage = pubnub.decrypt(bundle.getString("message"),PUBNUB_SHARED_KEY);
                 bundle.putString("message", decrypedMessage.substring(1, decrypedMessage.length()-1));

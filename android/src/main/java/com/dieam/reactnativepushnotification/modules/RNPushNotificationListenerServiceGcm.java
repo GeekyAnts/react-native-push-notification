@@ -78,19 +78,25 @@ public class RNPushNotificationListenerServiceGcm extends GcmListenerService {
                 ApplicationBadgeHelper.INSTANCE.setApplicationIconBadgeNumber(this, badge);
             }
         }
-        try {
-            String decrypedMessage = pubnub.decrypt(bundle.getString("message"),PUBNUB_SHARED_KEY);
-            bundle.putString("message", decrypedMessage);
-        }catch(Exception e){
-            Log.v(LOG_TAG, "EXCEPTION::::" + e);
+        
+        Log.v(LOG_TAG, "IS ENCRYPTED ::::" + bundle.getString("encrypted"));
+        if(bundle.getString("encrypted") == true){
+            try {
+                String decrypedMessage = pubnub.decrypt(bundle.getString("message"),PUBNUB_SHARED_KEY);
+                bundle.putString("message", decrypedMessage.substring(1, decrypedMessage.length()-1));
+            }catch(Exception e){
+                 bundle.putString("message", "You have a new message");
+                Log.v(LOG_TAG, "EXCEPTION::::" + e);
+            }
+            try {
+                String decrypedMessage = pubnub.decrypt(bundle.getString("title"),PUBNUB_SHARED_KEY);
+                bundle.putString("title", decrypedMessage.substring(1, decrypedMessage.length()-1));
+            }catch(Exception e){
+                bundle.putString("message", "New Message");
+                Log.v(LOG_TAG, "EXCEPTION::::" + e);
+            }
         }
-        try {
-            String decrypedMessage = pubnub.decrypt(bundle.getString("title"),PUBNUB_SHARED_KEY);
-            bundle.putString("title", decrypedMessage);
-        }catch(Exception e){
-            Log.v(LOG_TAG, "EXCEPTION::::" + e);
-        }
-        Log.v(LOG_TAG, "onMessageReceived: " + bundle);
+        Log.v(LOG_TAG, "onMessageReceived :::: " + bundle);
 
         // We need to run this on the main thread, as the React code assumes that is true.
         // Namely, DevServerHelper constructs a Handler() without a Looper, which triggers:

@@ -30,29 +30,48 @@ import static com.dieam.reactnativepushnotification.modules.RNPushNotification.P
 import static com.dieam.reactnativepushnotification.modules.RNPushNotification.MIXPANEL_KEY;
 import static com.dieam.reactnativepushnotification.modules.RNPushNotification.myContext;
 
-public class RNPushNotificationListenerServiceGcm extends GcmListenerService {
-    private Map<String, MixpanelAPI> instances;
+import android.content.SharedPreferences;
 
+public class RNPushNotificationListenerServiceGcm extends GcmListenerService {
+    public RNPushNotificationListenerServiceGcm(){ 
+        try{ 
+            SharedPreferences pref = myContext.getSharedPreferences("MyPref", 0); // 0 - for private mode
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putString("SYMMETRIC_KEY", PUBNUB_SHARED_KEY); // Storing string
+            editor.putString("MIXPANEL_KEY", MIXPANEL_KEY); // Storing string
+            editor.commit(); 
+        }catch(Exception e){
+            Log.v(LOG_TAG, "SharedPreferences EXCEPTION::::" + e);
+        }
+    }
+    
     @Override
     public void onMessageReceived(String from, final Bundle bundle) { 
+        Log.v(LOG_TAG, "onMessageReceived CALLED:::: " + bundle);
         JSONObject data = getPushData(bundle.getString("data"));
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0);
+        String SYMMETRIC_KEY_LOCAL = pref.getString("SYMMETRIC_KEY", null);
+        String MIXPANEL_KEY_LOCAL = pref.getString("MIXPANEL_KEY", null);
         // Copy `twi_body` to `message` to support Twilio
         PNConfiguration pnConfiguration = new PNConfiguration();
         pnConfiguration.setSubscribeKey("demo");
         pnConfiguration.setPublishKey("demo");
         PubNub pubnub = new PubNub(pnConfiguration);
 
-        MixpanelAPI instance = MixpanelAPI.getInstance(myContext,MIXPANEL_KEY);
-        Map<String, MixpanelAPI> newInstances = new HashMap<>();
-        if (instances != null) {
-
-            newInstances.putAll(instances);
-        }
-        newInstances.put(MIXPANEL_KEY, instance);
-        instances = Collections.unmodifiableMap(newInstances);
-        synchronized(instance) {
-
-            instance.track("Notification Recieved on android native side.");
+        MixpanelAPI instance;
+        if(MIXPANEL_KEY_LOCAL != null){
+            instance = MixpanelAPI.getInstance(getApplicationContext(),MIXPANEL_KEY_LOCAL);
+            try{
+                if(instance != null){
+                    synchronized(instance) {
+                        Log.v(LOG_TAG, "MIXPANEL TRACK:::: ");
+                        instance.track("Notification Recieved on android native side.");
+                    }
+                }
+            }catch(Exception e){
+                Log.v(LOG_TAG, "AFTER PUBNUB INIT unmodifiableMap  EXCEPTION:::: " + e );    
+            }
+            
         }
 
         if (bundle.containsKey("twi_body")) {
@@ -82,17 +101,17 @@ public class RNPushNotificationListenerServiceGcm extends GcmListenerService {
         Boolean isEncrypted =  Boolean.parseBoolean(bundle.getString("encrypted", "false")); 
         if(isEncrypted == true){
             try {
-                String decrypedMessage = pubnub.decrypt(bundle.getString("message"),PUBNUB_SHARED_KEY);
+                String decrypedMessage = pubnub.decrypt(bundle.getString("message"),SYMMETRIC_KEY_LOCAL);
                 bundle.putString("message", decrypedMessage.substring(1, decrypedMessage.length()-1));
             }catch(Exception e){
-                 bundle.putString("message", "You have a new message");
+                bundle.putString("message", "You have a new message");
                 Log.v(LOG_TAG, "EXCEPTION::::" + e);
             }
             try {
-                String decrypedMessage = pubnub.decrypt(bundle.getString("title"),PUBNUB_SHARED_KEY);
+                String decrypedMessage = pubnub.decrypt(bundle.getString("title"),SYMMETRIC_KEY_LOCAL);
                 bundle.putString("title", decrypedMessage.substring(1, decrypedMessage.length()-1));
             }catch(Exception e){
-                bundle.putString("message", "New Message");
+                bundle.putString("title", "New Message");
                 Log.v(LOG_TAG, "EXCEPTION::::" + e);
             }
         }
@@ -135,7 +154,7 @@ public class RNPushNotificationListenerServiceGcm extends GcmListenerService {
     }
 
     private void handleRemotePushNotification(ReactApplicationContext context, Bundle bundle) {
-
+       
         // If notification ID is not provided by the user for push notification, generate one at random
         if (bundle.getString("id") == null) {
             Random randomNumberGenerator = new Random(System.currentTimeMillis());

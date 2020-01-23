@@ -18,7 +18,6 @@ var Notifications = {
   onNotification: false,
   onRemoteFetch: false,
   isLoaded: false,
-  key: null,
   hasPoppedInitialNotification: false,
 
   isPermissionsRequestPending: false,
@@ -31,7 +30,6 @@ var Notifications = {
 };
 
 Notifications.callNative = function(name: String, params: Array) {
-  console.log("object callNative", this.handler[name]);
   if (typeof this.handler[name] === "function") {
     if (typeof params !== "array" && typeof params !== "object") {
       params = [];

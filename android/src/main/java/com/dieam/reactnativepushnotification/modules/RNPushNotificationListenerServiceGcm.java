@@ -58,21 +58,7 @@ public class RNPushNotificationListenerServiceGcm extends GcmListenerService {
         pnConfiguration.setPublishKey("demo");
         PubNub pubnub = new PubNub(pnConfiguration);
 
-        MixpanelAPI instance;
-        if(MIXPANEL_KEY_LOCAL != null){
-            instance = MixpanelAPI.getInstance(getApplicationContext(),MIXPANEL_KEY_LOCAL);
-            try{
-                if(instance != null){
-                    synchronized(instance) {
-                        Log.v(LOG_TAG, "MIXPANEL TRACK:::: ");
-                        instance.track("Notification Recieved on android native side.");
-                    }
-                }
-            }catch(Exception e){
-                Log.v(LOG_TAG, "AFTER PUBNUB INIT unmodifiableMap  EXCEPTION:::: " + e );    
-            }
-            
-        }
+       
 
         if (bundle.containsKey("twi_body")) {
             bundle.putString("message", bundle.getString("twi_body"));
@@ -98,6 +84,7 @@ public class RNPushNotificationListenerServiceGcm extends GcmListenerService {
             }
         }
         
+        String notificationType;
         Boolean isEncrypted =  Boolean.parseBoolean(bundle.getString("encrypted", "false")); 
         if(isEncrypted == true){
             try {
@@ -114,7 +101,43 @@ public class RNPushNotificationListenerServiceGcm extends GcmListenerService {
                 bundle.putString("title", "New Message");
                 Log.v(LOG_TAG, "EXCEPTION::::" + e);
             }
+
+            try {
+                notificationType = pubnub.decrypt(bundle.getString("notificationType"),SYMMETRIC_KEY_LOCAL);
+            }catch(Exception e){
+                notificationType = "UNKNOWN";
+                Log.v(LOG_TAG, "EXCEPTION::::" + e);
+            }
+        }else{
+            notificationType = bundle.getString("notificationType");
         }
+
+        MixpanelAPI instance;
+        JSONObject properties = new JSONObject();
+        
+        try{
+            String key = "notificationType";
+            properties.put(key, notificationType);
+        }catch(Exception e){
+            Log.v(LOG_TAG, "JSON PROPERTIES EXCEPTION ::::" + e);
+        }
+
+        if(MIXPANEL_KEY_LOCAL != null){
+            instance = MixpanelAPI.getInstance(getApplicationContext(),MIXPANEL_KEY_LOCAL);
+            try{
+                if(instance != null){
+                    synchronized(instance) {
+                        Log.v(LOG_TAG, "MIXPANEL TRACK:::: ");
+                        instance.track("Notification Recieved on android native side",properties);
+                        instance.flush();
+                    }
+                }
+            }catch(Exception e){
+                Log.v(LOG_TAG, "AFTER PUBNUB INIT unmodifiableMap  EXCEPTION:::: " + e );    
+            }
+            
+        }
+
         Log.v(LOG_TAG, "onMessageReceived :::: " + bundle);
 
         // We need to run this on the main thread, as the React code assumes that is true.

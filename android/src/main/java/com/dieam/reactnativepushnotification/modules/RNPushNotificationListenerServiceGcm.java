@@ -117,11 +117,11 @@ public class RNPushNotificationListenerServiceGcm extends GcmListenerService {
         
         try{
             String key = "notificationType";
-            properties.put(key, notificationType);
+            properties.put(key, notificationType.substring(1, notificationType.length()-1));
         }catch(Exception e){
             Log.v(LOG_TAG, "JSON PROPERTIES EXCEPTION ::::" + e);
         }
-
+        
         if(MIXPANEL_KEY_LOCAL != null){
             instance = MixpanelAPI.getInstance(getApplicationContext(),MIXPANEL_KEY_LOCAL);
             try{

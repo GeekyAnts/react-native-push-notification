@@ -1,7 +1,7 @@
 package com.dieam.reactnativepushnotification.modules;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 
 import com.facebook.react.bridge.ReadableMap;
@@ -153,7 +153,8 @@ public class RNPushNotificationAttributes {
                     break;
                 }
                 case Number: {
-                    if ((userInfo.getDouble(key) != bundle.getDouble(key)) && (userInfo.getInt(key) != bundle.getInt(key)))
+                    if ((userInfo.getDouble(key) != bundle.getDouble(key))
+                            && (userInfo.getInt(key) != bundle.getInt(key)))
                         return false;
                     break;
                 }
@@ -163,9 +164,9 @@ public class RNPushNotificationAttributes {
                     break;
                 }
                 case Map:
-                    return false;//there are no maps in the bundle
+                    return false;// there are no maps in the bundle
                 case Array:
-                    return false;//there are no arrays in the bundle
+                    return false;// there are no arrays in the bundle
             }
         }
 
@@ -227,8 +228,9 @@ public class RNPushNotificationAttributes {
             jsonObject.put(REPEAT_TIME, repeatTime);
             jsonObject.put(ONGOING, ongoing);
         } catch (JSONException e) {
-            Log.e(LOG_TAG, "Exception while converting RNPushNotificationAttributes to " +
-                    "JSON. Returning an empty object", e);
+            Log.e(LOG_TAG,
+                    "Exception while converting RNPushNotificationAttributes to " + "JSON. Returning an empty object",
+                    e);
             return new JSONObject();
         }
         return jsonObject;
@@ -237,31 +239,14 @@ public class RNPushNotificationAttributes {
     @Override
     // For debugging
     public String toString() {
-        return "RNPushNotificationAttributes{" +
-                "id='" + id + '\'' +
-                ", message='" + message + '\'' +
-                ", fireDate=" + fireDate +
-                ", title='" + title + '\'' +
-                ", ticker='" + ticker + '\'' +
-                ", autoCancel=" + autoCancel +
-                ", largeIcon='" + largeIcon + '\'' +
-                ", smallIcon='" + smallIcon + '\'' +
-                ", bigText='" + bigText + '\'' +
-                ", subText='" + subText + '\'' +
-                ", number='" + number + '\'' +
-                ", sound='" + sound + '\'' +
-                ", color='" + color + '\'' +
-                ", group='" + group + '\'' +
-                ", userInteraction=" + userInteraction +
-                ", playSound=" + playSound +
-                ", vibrate=" + vibrate +
-                ", vibration=" + vibration +
-                ", actions='" + actions + '\'' +
-                ", tag='" + tag + '\'' +
-                ", repeatType='" + repeatType + '\'' +
-                ", repeatTime=" + repeatTime +
-                ", ongoing=" + ongoing +
-                '}';
+        return "RNPushNotificationAttributes{" + "id='" + id + '\'' + ", message='" + message + '\'' + ", fireDate="
+                + fireDate + ", title='" + title + '\'' + ", ticker='" + ticker + '\'' + ", autoCancel=" + autoCancel
+                + ", largeIcon='" + largeIcon + '\'' + ", smallIcon='" + smallIcon + '\'' + ", bigText='" + bigText
+                + '\'' + ", subText='" + subText + '\'' + ", number='" + number + '\'' + ", sound='" + sound + '\''
+                + ", color='" + color + '\'' + ", group='" + group + '\'' + ", userInteraction=" + userInteraction
+                + ", playSound=" + playSound + ", vibrate=" + vibrate + ", vibration=" + vibration + ", actions='"
+                + actions + '\'' + ", tag='" + tag + '\'' + ", repeatType='" + repeatType + '\'' + ", repeatTime="
+                + repeatTime + ", ongoing=" + ongoing + '}';
     }
 
     public String getId() {
